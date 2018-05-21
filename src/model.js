@@ -148,18 +148,36 @@ function _save_merge(model, resolve, reject) {
 		if (err) {
 			return reject(err);
 		}
-		model._set = {};
 		collection.updateOne({_id: _id}, update, {upsert: true}, (err) => {
 			if (err) {
 				return reject(err);
 			}
-			model.orm.cache.delete(model.name, model.data._id, (err) => {
-				if (err) {
-					return reject(err);
-				}
-				resolve(_id);
-			});
+			_update_deps(model).then(() => {
+				model._set = {};
+				model.orm.cache.delete(model.name, model.data._id, (err) => {
+					if (err) {
+						return reject(err);
+					}
+					resolve(_id);
+				});
+			}).catch(reject);
 		});
+	});
+}
+
+/**
+ *
+ * @param {Model} model
+ * @param {Object} set
+ * @returns {Promise}
+ * @private
+ */
+function _update_deps(model, set) {
+	return new Promise((resolve, reject) => {
+		fast.object.forEach(model.orm.schemas[model.name].dependents, (paths, modelName) => {
+			console.log(paths, modelName);
+		});
+		resolve();
 	});
 }
 
