@@ -3,6 +3,7 @@
  */
 "use strict";
 const mongodb = require("mongodb");
+const ObjectID = mongodb.ObjectID;
 const AMule = require("amule");
 const Aim = require("amule-aim");
 const Rush = require("amule-rush");
@@ -60,9 +61,15 @@ MongoDB.Cursor = Cursor;
  */
 MongoDB.prototype.connect = function (connectionString) {
 	this._connectionString = "";
+	const cache_name = connectionString;
+	if (cache_name in __c_caches) {
+		this._connectionString = connectionString;
+		return this.client = __c_caches[cache_name];
+	}
 	return mongodb.MongoClient.connect(connectionString).then((client) => {
 		this._connectionString = connectionString;
 		this.client = client;
+		__c_caches[cache_name] = client;
 		return client;
 	});
 };
@@ -80,6 +87,8 @@ MongoDB.prototype.use = function (dbName) {
  * Disconnects from server
  */
 MongoDB.prototype.disconnect = function () {
+	const cache_name = this._connectionString;
+	delete __c_caches[cache_name];
 	this.cache.pop();
 	this.cache.pop().client.disconnect(); // Redis disconnect
 	this.cache = null;
@@ -230,6 +239,7 @@ MongoDB.prototype.aggregate = function (sandstorm, name, pipeline, options) {
 	return this.db.collection(name).aggregate(pipeline, options);
 };
 const __caches = {};
+const __c_caches = {};
 
 /**
  * @param {MongoDB} engine
