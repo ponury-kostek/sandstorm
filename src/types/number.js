@@ -21,7 +21,7 @@ function _set(model, target, set, schema, key, path, value) {
 		return Promise.reject(new ExtError("ERR_NUMBER_LOWER_THAN_ALLOWED", "Expected value of '" + path + "' to be greater than " + schema.min + ", got " + value));
 	}
 	if (schema.max !== undefined && value > schema.max) {
-		return Promise.reject(new ExtError("ERR_NUMBER_GREATER_THAN_ALLOWED", "Expected value of '" + path + "' to be lower than " + schema.min + ", got " + value));
+		return Promise.reject(new ExtError("ERR_NUMBER_GREATER_THAN_ALLOWED", "Expected value of '" + path + "' to be lower than " + schema.max + ", got " + value));
 	}
 	set[key] = target[key] = value;
 	return Promise.resolve();
