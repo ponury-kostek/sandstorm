@@ -238,7 +238,7 @@ function setTargetItem(parameters) {
 			if (_id) {
 				return model.orm.get(type, _id).then(nested => {
 					target[key][target_key] = set[key][target_key] = nested;
-					return nested.merge(data);
+					return nested && nested.merge(data);
 				});
 			} else {
 				item = new Model(model.orm, type);
