@@ -348,8 +348,7 @@ describe("Model", () => {
 					c: {o: {o: {b: "b"}}}
 				}
 			});
-			const {_id} = await model.save();
-			console.log(_id);
+			const _id = await model.save();
 			model = await orm.get("DeepMerge", _id);
 			await model.merge({
 				o: {
