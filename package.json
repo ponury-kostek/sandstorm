@@ -1,6 +1,6 @@
 {
   "name": "sandstorm",
-  "version": "0.3.25",
+  "version": "0.3.26",
   "description": "Not a MongoDB ORM",
   "main": "./index.js",
   "scripts": {
@@ -34,16 +34,16 @@
     "amule": "^0.2.5",
     "amule-aim": "^0.5.4",
     "amule-more": "^0.2.2",
-    "amule-rush": "^0.3.6",
+    "amule-rush": "^0.3.7",
     "exterror": "^1.3.1"
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
-    "coveralls": "^3.0.11",
+    "coveralls": "^3.1.0",
     "ink-docstrap": "^1.3.2",
-    "mocha": "^7.1.1",
+    "mocha": "^8.4.0",
     "mocha-lcov-reporter": "^1.3.0",
-    "mongodb": "^3.5.5",
-    "nyc": "^15.0.0"
+    "mongodb": "^3.6.6",
+    "nyc": "^15.1.0"
   }
 }
