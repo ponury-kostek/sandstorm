@@ -94,7 +94,7 @@ function pathMap(object, path, callback) {
 			return object.map((item, key) => _pathMap(item, path, key, object));
 		}
 		if (!path) {
-			return callback(object, current_key, origin || object);
+			return callback(object, current_key, object);
 		}
 		const parts = path.split(".");
 		let current;
@@ -108,7 +108,7 @@ function pathMap(object, path, callback) {
 					return pathMap(item, parts.join("."), callback);
 				}
 				if (!parts.length) {
-					return callback(item, current_key || current, object);
+					return callback(item, current, object);
 				}
 			}
 			object = item;

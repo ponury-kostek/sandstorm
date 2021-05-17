@@ -3,7 +3,10 @@
  * @ignore
  */
 const assert = require("assert");
-const {ObjectID, MongoClient} = require("mongodb");
+const {
+	ObjectID,
+	MongoClient
+} = require("mongodb");
 /**
  *
  * @type {Sandstorm}
@@ -175,9 +178,23 @@ describe("Model", () => {
 				_db = db;
 				return _db.dropDatabase();
 			}).then(() => {
-				orm.register("Embed", {
+				orm.register("Embed2", {
 					name: "String",
 					value: "String"
+				});
+				orm.register("Embed", {
+					name: "String",
+					value: "String",
+					arr: {
+						type: "Array",
+						item: {
+							type: "Object",
+							properties: {
+								a: "String",
+								b: "Embed2"
+							}
+						}
+					}
 				});
 				orm.Schema.register("Base", {
 					array: [
@@ -191,8 +208,7 @@ describe("Model", () => {
 						}
 					],
 					embed: {
-						type: "Embed",
-						embed: ["name"]
+						type: "Embed"
 					},
 					object: {
 						array: [
@@ -214,6 +230,22 @@ describe("Model", () => {
 			orm.disconnect().then(() => {
 				done();
 			}).catch(done);
+		});
+		it("base set 2", async function () {
+			const model = orm.create("Base");
+			await model.set({
+				embed: {
+					arr: [
+						{a: "adad"}
+					]
+				}
+			});
+			const _id = await model.save();
+			/*const data = (await orm.findOne("Base", {_id})).get({dry:true});
+			console.dir(data, {
+				depth: 5,
+				colors: true
+			});*/
 		});
 		it("base set", async function () {
 			const model = orm.create("Base");
