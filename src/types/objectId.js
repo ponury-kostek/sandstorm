@@ -3,7 +3,7 @@
  */
 "use strict";
 const common = require("../common");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 const ExtError = require("exterror");
 
 /**
@@ -36,13 +36,13 @@ function _set(model, target, set, schema, key, path, value) {
 function set(model, target, set, schema, key, path, value) {
 	if (typeof value === "string" && schema.coerce) {
 		try {
-			value = new ObjectID(value);
+			value = new ObjectId(value);
 		} catch (e) {
 			return Promise.reject(e);
 		}
 	}
-	if (!(value instanceof ObjectID)) {
-		return Promise.reject(new ExtError("ERR_WRONG_PROPERTY_TYPE", "Expected value of '" + path + "' to be instance of ObjectID or string, got " + typeof value));
+	if (!(value instanceof ObjectId)) {
+		return Promise.reject(new ExtError("ERR_WRONG_PROPERTY_TYPE", "Expected value of '" + path + "' to be instance of ObjectId or string, got " + typeof value));
 	}
 	return _set(model, target, set, schema, key, path, value);
 }

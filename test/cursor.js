@@ -6,7 +6,7 @@
  * @ignore
  */
 const assert = require("assert");
-const {ObjectID, MongoClient} = require("mongodb");
+const {ObjectId, MongoClient} = require("mongodb");
 /**
  *
  * @type {Sandstorm}
@@ -157,7 +157,7 @@ describe("Cursor", () => {
 			assert.strictEqual(results.length, 2);
 			assert.strictEqual(results[0].get().id, 9);
 			assert.strictEqual(results[1].get().id, 7);
-			await assert.rejects(cursor.next());
+			assert(await cursor.next() === null);
 		});
 	});
 	describe("forEach", () => {
@@ -169,7 +169,7 @@ describe("Cursor", () => {
 				9,
 				8
 			]);
-			await assert.rejects(cursor.next());
+			assert(await cursor.next() === null);
 		});
 	});
 	describe("map", () => {
@@ -179,7 +179,7 @@ describe("Cursor", () => {
 				9,
 				8
 			]);
-			await assert.rejects(cursor.next());
+			assert(await cursor.next() === null);
 		});
 	});
 	describe("next", () => {

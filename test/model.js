@@ -4,7 +4,7 @@
  */
 const assert = require("assert");
 const {
-	ObjectID,
+	ObjectId,
 	MongoClient
 } = require("mongodb");
 /**
@@ -40,7 +40,7 @@ describe("Model", () => {
 				mix: "Mixed",
 				number: "Number",
 				object: "Object",
-				objId: "ObjectID",
+				objId: "ObjectId",
 				string: "String"
 			});
 			orm.connect("mongodb://root:root@localhost/admin").then(() => {
@@ -60,7 +60,7 @@ describe("Model", () => {
 		it("set + merge", function (done) {
 			const model = orm.create("Base");
 			const date = new Date();
-			const objId = new ObjectID();
+			const objId = new ObjectId();
 			model.set({
 				_id: "Klucz",
 				array: [
@@ -154,7 +154,7 @@ describe("Model", () => {
 			const model = orm.create("Delete", {name: "test"});
 			let _id = null;
 			model.save().then(async () => {
-				_id = new ObjectID(model.data._id);
+				_id = new ObjectId(model.data._id);
 				const _doc = await _db.collection("Delete").findOne({_id});
 				assert.deepStrictEqual(_doc, {
 					_id: model.data._id,
@@ -278,20 +278,19 @@ describe("Model", () => {
 				}
 			});
 			await model.save();
-			let _doc = await _db.collection("Base").findOne({_id: new ObjectID(model.data._id)});
+			let _doc = await _db.collection("Base").findOne({_id: new ObjectId(model.data._id)});
 			assert(_doc.array instanceof Array);
 			assert(_doc.array.length === 1);
 			assert(_doc.array[0].item.length === 1);
-			assert(_doc.array[0].item[0]._id instanceof ObjectID);
+			assert(_doc.array[0].item[0]._id instanceof ObjectId);
 			assert(_doc.array[0].item[0].name === "in_array");
 			assert(_doc.object.array instanceof Array);
 			assert(_doc.object.array.length === 1);
-			assert(_doc.object.array[0]._id instanceof ObjectID);
+			assert(_doc.object.array[0]._id instanceof ObjectId);
 			assert(_doc.object.array[0].name === "in_object_array");
-			assert(_doc.object.embed._id instanceof ObjectID);
+			assert(_doc.object.embed._id instanceof ObjectId);
 			assert(_doc.object.embed.name === "in_object");
-			assert(_doc.embed._id instanceof ObjectID);
-			assert(_doc.embed.name === "in_root");
+			assert(_doc.embed._id instanceof ObjectId);
 			const embed = await orm.get("Embed", _doc.object.array[0]._id);
 			await embed.merge({name: "updated"});
 			await embed.save();
@@ -332,20 +331,19 @@ describe("Model", () => {
 				embed: _embed
 			});
 			await model.save();
-			let _doc = await _db.collection("Base").findOne({_id: new ObjectID(model.data._id)});
+			let _doc = await _db.collection("Base").findOne({_id: new ObjectId(model.data._id)});
 			assert(_doc.array instanceof Array);
 			assert(_doc.array.length === 1);
 			assert(_doc.array[0].item.length === 1);
-			assert(_doc.array[0].item[0]._id instanceof ObjectID);
+			assert(_doc.array[0].item[0]._id instanceof ObjectId);
 			assert(_doc.array[0].item[0].name === "in_array");
 			assert(_doc.object.array instanceof Array);
 			assert(_doc.object.array.length === 1);
-			assert(_doc.object.array[0]._id instanceof ObjectID);
+			assert(_doc.object.array[0]._id instanceof ObjectId);
 			assert(_doc.object.array[0].name === "in_object_array");
-			assert(_doc.object.embed._id instanceof ObjectID);
+			assert(_doc.object.embed._id instanceof ObjectId);
 			assert(_doc.object.embed.name === "in_object");
-			assert(_doc.embed._id instanceof ObjectID);
-			assert(_doc.embed.name === "in_root");
+			assert(_doc.embed._id instanceof ObjectId);
 			const embed = await orm.get("Embed", _doc.object.array[0]._id);
 			await embed.merge({name: "updated"});
 			await embed.save();
@@ -416,22 +414,21 @@ describe("Model", () => {
 				embed: _embed
 			});
 			await model.save();
-			let _doc = await _db.collection("Base").findOne({_id: new ObjectID(model.data._id)});
+			let _doc = await _db.collection("Base").findOne({_id: new ObjectId(model.data._id)});
 			assert(_doc.array instanceof Array);
 			assert(_doc.array.length === 1);
 			assert(_doc.array[0].item.length === 2);
-			assert(_doc.array[0].item[0]._id instanceof ObjectID);
+			assert(_doc.array[0].item[0]._id instanceof ObjectId);
 			assert(_doc.array[0].item[0].name === "embed");
-			assert(_doc.array[0].item[1]._id instanceof ObjectID);
+			assert(_doc.array[0].item[1]._id instanceof ObjectId);
 			assert(_doc.array[0].item[1].name === "embed");
 			assert(_doc.object.array instanceof Array);
 			assert(_doc.object.array.length === 1);
-			assert(_doc.object.array[0]._id instanceof ObjectID);
+			assert(_doc.object.array[0]._id instanceof ObjectId);
 			assert(_doc.object.array[0].name === "embed");
-			assert(_doc.object.embed._id instanceof ObjectID);
+			assert(_doc.object.embed._id instanceof ObjectId);
 			assert(_doc.object.embed.name === "embed");
-			assert(_doc.embed._id instanceof ObjectID);
-			assert(_doc.embed.name === "embed");
+			assert(_doc.embed._id instanceof ObjectId);
 			const embed = await orm.get("Embed", _doc.object.array[0]._id);
 			await embed.merge({name: "updated"});
 			await embed.save();

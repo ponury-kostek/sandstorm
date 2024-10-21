@@ -12,6 +12,20 @@ const assert = require("assert");
  */
 const Orm = require("../");
 const orm = new Orm();
+
+orm.Schema.register("DuplicateKey", {
+	$options: {
+		indexes: [
+			{
+				fieldOrSpec: {key: 1},
+				options: {unique: true}
+			}
+		]
+	},
+	key: "String",
+	value: "String"
+});
+
 orm.Schema.register("Base", {
 	array: "Array",
 	bool: "Boolean",
@@ -19,7 +33,7 @@ orm.Schema.register("Base", {
 	mix: "Mixed",
 	number: "Number",
 	object: "Object",
-	objId: "ObjectID",
+	objId: "ObjectId",
 	string: "String"
 });
 let _db = null;
@@ -33,6 +47,8 @@ describe("Sandstorm", () => {
 		}).then((db) => {
 			_db = db;
 			return _db.dropDatabase();
+		}).then(() => {
+			return orm.use("sandstorm_test");
 		}).then(() => {
 			done();
 		}).catch(done);
@@ -247,6 +263,19 @@ describe("Sandstorm", () => {
 			orm.Schema.register("Create", {
 				key: "String",
 				value: "String"
+			});
+		});
+
+		it("duplicate key", async () => {
+			const model = orm.create("DuplicateKey");
+			await model.set({
+				key: "K1",
+				value: "V1"
+			});
+			const model2 = orm.create("DuplicateKey");
+			await model2.set({
+				key: "K1",
+				value: "V1"
 			});
 		});
 		it("existing", () => {

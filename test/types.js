@@ -3,13 +3,13 @@
  * @ignore
  */
 const assert = require("assert");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 const Orm = require("../");
 describe("types", () => {
 	describe("save + merge", () => {
-		describe("ObjectID", () => {
+		describe("ObjectId", () => {
 			const orm = new Orm();
-			orm.register("test", {key: "ObjectID"});
+			orm.register("test", {key: "ObjectId"});
 			let _db;
 			after(async () => {
 				await orm.disconnect();
@@ -26,12 +26,12 @@ describe("types", () => {
 			});
 			[
 				{
-					schema: {type: "ObjectID"},
-					value: new ObjectID(),
+					schema: {type: "ObjectId"},
+					value: new ObjectId(),
 					name: "instance"
 				},
 				{
-					schema: {type: "ObjectID"},
+					schema: {type: "ObjectId"},
 					value: "123456789012345678901234",
 					name: "string"
 				}
@@ -523,7 +523,6 @@ describe("types", () => {
 					orm.register("test", {key: [{name:"String", value:"String"}]});
 					const model = orm.create("test");
 					model.set({key: [{name:"A"}]}).then(() => {
-						console.log();
 						assert(!('value' in model.get({dry:true}).key[0]));
 						done();
 					}).catch(done);
@@ -763,26 +762,26 @@ describe("types", () => {
 					});
 				});
 			});
-			describe("ObjectID", () => {
+			describe("ObjectId", () => {
 				[
 					{
-						schema: {type: "ObjectID"},
+						schema: {type: "ObjectId"},
 						value: null,
 						name: "basic"
 					},
 					{
-						schema: {type: "ObjectID"},
+						schema: {type: "ObjectId"},
 						value: undefined,
 						name: "basic"
 					},
 					{
-						schema: {type: "ObjectID"},
+						schema: {type: "ObjectId"},
 						value: "wrong string value",
 						name: "basic"
 					},
 					{
 						schema: {
-							type: "ObjectID",
+							type: "ObjectId",
 							required: true
 						},
 						name: "missing required"

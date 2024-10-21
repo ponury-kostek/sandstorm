@@ -1,6 +1,6 @@
 {
   "name": "sandstorm",
-  "version": "0.3.27",
+  "version": "0.3.28",
   "description": "Not a MongoDB ORM",
   "main": "./index.js",
   "scripts": {
@@ -28,22 +28,23 @@
   },
   "homepage": "https://github.com/alexandrajs/sandstorm#readme",
   "peerDependencies": {
-    "mongodb": "^3.5.1"
+    "mongodb": "^6.9.0"
   },
   "dependencies": {
-    "amule": "^0.2.5",
-    "amule-aim": "^0.5.4",
-    "amule-more": "^0.2.2",
-    "amule-rush": "^0.3.7",
+    "amule": "^0.2.6",
+    "amule-aim": "^0.5.5",
+    "amule-more": "^0.2.4",
+    "amule-rush": "^0.3.8",
     "exterror": "^1.3.1"
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.1",
     "ink-docstrap": "^1.3.2",
-    "mocha": "^9.1.1",
+    "mocha": "^10.7.3",
     "mocha-lcov-reporter": "^1.3.0",
-    "mongodb": "^3.7.0",
-    "nyc": "^15.1.0"
+    "mongodb": "^6.9.0",
+    "mongodb-memory-server": "^10.1.2",
+    "nyc": "^17.1.0"
   }
 }

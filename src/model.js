@@ -3,7 +3,7 @@
  */
 "use strict";
 const ExtError = require("exterror");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 
 /**
  *
@@ -111,32 +111,26 @@ Model.prototype.toJSON = function () {
  * @private
  */
 function _save_set(model, resolve, reject) {
-	model.orm.db.collection(model.name, (err, collection) => {
-		if (err) {
-			return reject(err);
-		}
-		const doc = _get(model, {dry: true});
-		const _save_set_cb = (err) => {
+	const collection = model.orm.db.collection(model.name);
+	const doc = _get(model, {dry: true});
+	const _save_set_cb = () => {
+
+		model._set = {};
+		model.data._id = doc._id;
+		model.orm.cache.delete(model.name, doc._id, (err) => {
 			if (err) {
 				return reject(err);
 			}
-			model._set = {};
-			model.data._id = doc._id;
-			model.orm.cache.delete(model.name, doc._id, (err) => {
-				if (err) {
-					return reject(err);
-				}
-				resolve(doc._id);
-			});
-		};
-		if (model.data._id) {
-			if (typeof model.data._id === "string" && !model.schema.properties.hasOwnProperty("_id")) {
-				model.data._id = new ObjectID(model.data._id);
-			}
-			return collection.replaceOne({_id: model.data._id}, doc, {upsert: true}, _save_set_cb);
+			resolve(doc._id);
+		});
+	};
+	if (model.data._id) {
+		if (typeof model.data._id === "string" && !model.schema.properties.hasOwnProperty("_id")) {
+			model.data._id = new ObjectId(model.data._id);
 		}
-		collection.insertOne(doc, _save_set_cb);
-	});
+		return collection.replaceOne({_id: model.data._id}, doc, {upsert: true}).then(_save_set_cb).catch(reject);
+	}
+	collection.insertOne(doc).then(_save_set_cb).catch(reject);
 }
 
 /**
@@ -150,10 +144,13 @@ function _save_merge(model, resolve, reject) {
 	if (!model.data._id) {
 		return reject(new ExtError("ERR_MISSING_ID_ON_MERGE_SAVE", "Missing '_id' on merge save"));
 	}
-	const _id = (typeof model.data._id === "string" && !model.schema.properties.hasOwnProperty("_id")) ? new ObjectID(model.data._id) : model.data._id;
+
+	const _id = (typeof model.data._id === "string" && !model.schema.properties.hasOwnProperty("_id")) ? new ObjectId(model.data._id) : model.data._id;
+
 	if (common.isEmpty(model._set)) {
 		return resolve(_id);
 	}
+
 	const update = {
 		$set: common.objectToDotNotation(_get(model, {
 			dry: true,
@@ -161,23 +158,18 @@ function _save_merge(model, resolve, reject) {
 			properties: Object.keys(model._set)
 		}))
 	};
-	model.orm.db.collection(model.name, (err, collection) => {
-		if (err) {
-			return reject(err);
-		}
-		model._set = {};
-		collection.updateOne({_id: _id}, update, {upsert: true}, (err) => {
+
+	const collection = model.orm.db.collection(model.name);
+
+	model._set = {};
+	collection.updateOne({_id: _id}, update, {upsert: true}).then(() => {
+		model.orm.cache.delete(model.name, model.data._id, (err) => {
 			if (err) {
 				return reject(err);
 			}
-			model.orm.cache.delete(model.name, model.data._id, (err) => {
-				if (err) {
-					return reject(err);
-				}
-				resolve(_id);
-			});
+			resolve(_id);
 		});
-	});
+	}).catch(reject);
 }
 
 /**
@@ -195,20 +187,15 @@ function _delete(model) {
 			if (err) {
 				return reject(err);
 			}
-			model.orm.db.collection(model.name, (err, collection) => {
-				if (err) {
-					return reject(err);
-				}
-				collection.deleteOne({_id: model.data._id}, (err) => {
-					model.orm.cache.delete(model.name, model.data._id, () => {
-					});
+			model.orm.db.collection(model.name).deleteOne({_id: model.data._id}).then(() => {
+				model.orm.cache.delete(model.name, model.data._id, (err) => {
 					if (err) {
 						return reject(err);
 					}
 					model.orm = model.name = model.schema = model.data = model.overwrite = model._set = model._hydrated = null;
 					resolve();
 				});
-			});
+			}).catch(reject);
 		});
 	});
 }
@@ -230,7 +217,7 @@ function _get(model, options) {
 	const source = model[_get_key];
 	const properties = {};
 	if (source._id && !model.schema.properties.hasOwnProperty("_id")) {
-		properties._id = new ObjectID(source._id);
+		properties._id = new ObjectId(source._id);
 	}
 	(options.properties || Object.keys(model.schema.properties)).forEach((propertyKey) => {
 		const type = model.schema.properties[propertyKey].type;
@@ -278,10 +265,10 @@ function _set(model, properties, merge) {
 				}
 				if (!merge) {
 					if (typeof item === "string") {
-						item = new ObjectID(item);
+						item = new ObjectId(item);
 					}
-					if (!(item instanceof ObjectID)) {
-						throw new ExtError("ERR_ID_MUST_BE_OBJECTID", "Value of '_id' must be instance of ObjectID or string, got " + typeof item);
+					if (!(item instanceof ObjectId)) {
+						throw new ExtError("ERR_ID_MUST_BE_OBJECTID", "Value of '_id' must be instance of ObjectId or string, got " + typeof item);
 					}
 					model.data[targetKey] = model._set[targetKey] = item;
 					return;

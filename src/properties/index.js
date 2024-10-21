@@ -9,7 +9,7 @@ const MixedProperty = require("./mixed");
 const ModelProperty = require("./model");
 const NumberProperty = require("./number");
 const ObjectProperty = require("./object");
-const ObjectIDProperty = require("./objectId");
+const ObjectIdProperty = require("./objectId");
 const StringProperty = require("./string");
 module.exports = {
 	ArrayProperty,
@@ -19,6 +19,6 @@ module.exports = {
 	ModelProperty,
 	NumberProperty,
 	ObjectProperty,
-	ObjectIDProperty,
+	ObjectIdProperty,
 	StringProperty
 };

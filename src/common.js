@@ -3,7 +3,7 @@
  */
 "use strict";
 const ExtError = require("exterror");
-const {ObjectID} = require("mongodb");
+const {ObjectId} = require("mongodb");
 
 /**
  *
@@ -36,7 +36,7 @@ function isPlainObject(value) {
  * @param {function} callback
  */
 function ormGet(orm, name, id, callback) {
-	orm.cache.get(name, (orm.schemas[name].properties.hasOwnProperty("_id") && orm.schemas[name].properties._id.type !== "ObjectID" ? id : new ObjectID(id)), callback);
+	orm.cache.get(name, (orm.schemas[name].properties.hasOwnProperty("_id") && orm.schemas[name].properties._id.type !== "ObjectId" ? id : new ObjectId(id)), callback);
 }
 
 /**
@@ -94,7 +94,7 @@ function pathMap(object, path, callback) {
 			return object.map((item, key) => _pathMap(item, path, key, object));
 		}
 		if (!path) {
-			return callback(object, current_key, object);
+			return callback(object, current_key, origin);
 		}
 		const parts = path.split(".");
 		let current;

@@ -27,12 +27,13 @@ describe("Schema", () => {
 			orm.connect("mongodb://root:root@localhost/admin").then(() => {
 				return orm.use("sandstorm_test_schema_options");
 			}).then((db) => {
-				return db.collection("Sub");
+				//return db.collection("Sub");
 			}).then((collection) => {
-				return collection.listIndexes().toArray();
+				//return collection.listIndexes().toArray();
 			}).then((indexes) => {
 				//console.log(indexes);
-				orm.disconnect();
+				return orm.disconnect();
+			}).then(() => {
 				done();
 			}).catch(done);
 		});
@@ -198,10 +199,10 @@ describe("Schema", () => {
 						properties: undefined
 					}
 				},
-				"ObjectID": {
-					in: {"key": "ObjectID"},
+				"ObjectId": {
+					in: {"key": "ObjectId"},
 					out: {
-						type: "ObjectID",
+						type: "ObjectId",
 						coerce: true,
 						required: false,
 						unique: false,
@@ -550,17 +551,17 @@ describe("Schema", () => {
 						}
 					}
 				},
-				"ObjectID": {
+				"ObjectId": {
 					in: {
 						"key": {
-							type: "ObjectID",
+							type: "ObjectId",
 							required: true,
 							unique: false,
 							default: null
 						}
 					},
 					out: {
-						type: "ObjectID",
+						type: "ObjectId",
 						coerce: true,
 						required: true,
 						unique: false,
@@ -599,7 +600,10 @@ describe("Schema", () => {
 							default: "string",
 							length: 5,
 							pattern: /^[a-z]*$/,
-							oneOf: ["one", "of"]
+							oneOf: [
+								"one",
+								"of"
+							]
 						}
 					},
 					out: {
@@ -610,7 +614,10 @@ describe("Schema", () => {
 						min: 5,
 						max: 5,
 						pattern: /^[a-z]*$/,
-						oneOf: ["one", "of"]
+						oneOf: [
+							"one",
+							"of"
+						]
 					}
 				}
 			};

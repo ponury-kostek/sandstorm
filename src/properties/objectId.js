@@ -8,12 +8,12 @@
  * @param options
  * @constructor
  */
-function ObjectIDProperty(options) {
-	this.type = "ObjectID";
+function ObjectIdProperty(options) {
+	this.type = "ObjectId";
 	this.coerce = options.coerce === undefined ? true : options.coerce;
 	this.required = options.required || false;
 	this.unique = options.unique || false;
 	this.default = options.default;
 }
 
-module.exports = ObjectIDProperty;
+module.exports = ObjectIdProperty;

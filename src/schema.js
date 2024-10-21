@@ -5,7 +5,15 @@
 const types = require("./types");
 const common = require("./common");
 const {
-	ArrayProperty, BooleanProperty, DateProperty, MixedProperty, ModelProperty, NumberProperty, ObjectProperty, ObjectIDProperty, StringProperty
+	ArrayProperty,
+	BooleanProperty,
+	DateProperty,
+	MixedProperty,
+	ModelProperty,
+	NumberProperty,
+	ObjectProperty,
+	ObjectIdProperty,
+	StringProperty
 } = require("./properties");
 module.exports = Schema;
 const ExtError = require("exterror");
@@ -182,8 +190,8 @@ function _expandProperty(property, path, schema, orm) {
 			return new ArrayProperty(property.options);
 		case "Object":
 			return new ObjectProperty(property.options);
-		case "ObjectID":
-			return new ObjectIDProperty(property.options);
+		case "ObjectId":
+			return new ObjectIdProperty(property.options);
 		case "Mixed":
 			return new MixedProperty(property.options);
 		default:

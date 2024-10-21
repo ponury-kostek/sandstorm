@@ -27,7 +27,7 @@ function Sandstorm(options) {
 		cache: {
 			l0: {},
 			l1: {},
-			l2: {enforceObjectID: false}
+			l2: {enforceObjectId: false}
 		}
 	};
 	Object.assign(this.options, options || {});
@@ -84,7 +84,7 @@ Sandstorm.prototype.connect = function (connectionString, connectionOptions) {
 		this.client = __c_caches[cache_name];
 		return Promise.resolve(this.client);
 	}
-	return mongodb.MongoClient.connect(connectionString, Object.assign({useNewUrlParser: true}, connectionOptions || {})).then((client) => {
+	return mongodb.MongoClient.connect(connectionString, Object.assign({}, connectionOptions || {})).then((client) => {
 		this._connectionString = connectionString;
 		this._connectionOptions = connectionOptions;
 		this.client = client;
@@ -142,7 +142,8 @@ Sandstorm.prototype.create = function (name, data) {
  * @returns {Cursor}
  */
 Sandstorm.prototype.find = function (name, query, options) {
-	return new Cursor(this.db.collection(name).find(query, Object.assign({}, this.schemas[name].options || {}, options || {})), this, name, this.schemas[name].options);
+	return new Cursor(this.db.collection(name).find(query,
+		Object.assign({}, this.schemas[name].options || {}, options || {})), this, name, this.schemas[name].options);
 };
 /**
  * Find one document
@@ -184,8 +185,8 @@ Sandstorm.prototype.findOneAndUpdate = function (name, filter, update, options) 
 		hydrate,
 		...query_options
 	} = options;
-	query_options.returnOriginal = false;
-	return this.db.collection(name).findOneAndUpdate(filter, update, query_options).then(({value: doc}) => {
+	query_options.returnDocument= "after";
+	return this.db.collection(name).findOneAndUpdate(filter, update, query_options).then((doc) => {
 		if (!doc) {
 			return doc;
 		}
@@ -211,7 +212,7 @@ Sandstorm.prototype.aggregate = function (name, pipeline, options) {
 /**
  * Get one or more models
  * @param {string} name
- * @param {String|String[]|ObjectID|ObjectID[]} ids
+ * @param {String|String[]|ObjectId|ObjectId[]} ids
  * @param {Object} [options]
  * @returns {Promise}
  */
@@ -247,11 +248,13 @@ Sandstorm.prototype.get = function (name, ids, options) {
 	}
 	return Promise.all(wait);
 };
+
 Sandstorm.prototype.autoincrement = function (name) {
 	return this.db.collection("_autoincrement").findOneAndUpdate({_id: name}, {$inc: {value: 1}}, {
-		upsert: true,
-		returnOriginal: false
-	}).then((result) => result.value.value);
+		upsert: true, returnDocument: "after"
+	}).then((result) => {
+		return result.value
+	});
 };
 /**
  * @see Schema.register
@@ -304,45 +307,41 @@ function _ensure_indexes(db, schemas, options) {
 	Object.entries(schemas).forEach(([name, schema]) => {
 		const indexes = schema.options.indexes;
 		indexes && wait.push(new Promise((resolve, reject) => {
-			db.collection(name, (err, collection) => {
-				if (err) {
-					return reject(err);
+			const collection = db.collection(name);
+			Promise.all(indexes.map((index) => {
+				if (!common.isPlainObject(index)) {
+					return Promise.reject(new ExtError("ERR_COLLECTION_INDEX_MUST_BE_OBJECT", "Collection index must be plain object"));
 				}
-				resolve(Promise.all(indexes.map((index) => {
-					if (!common.isPlainObject(index)) {
-						return Promise.reject(new ExtError("ERR_COLLECTION_INDEX_MUST_BE_OBJECT", "Collection index must be plain object"));
+				if (typeof index.fieldOrSpec !== "string" && !common.isPlainObject(index.fieldOrSpec)) {
+					return Promise.reject(new ExtError("ERR_COLLECTION_INDEX_FIELD_OR_SPEC_MUST_BE_OBJECT_OR_STRING", "Collection index.fieldOrSpec must be plain object or string"));
+				}
+				const index_options = Object.assign({}, index.options || {});
+				const collation = Object.assign({}, schema.options.collation || {});
+				if (!common.isEmpty(collation) && !index_options.collation) {
+					index_options.collation = collation;
+				}
+				return collection.indexExists(common.fieldOrSpecToName(index.fieldOrSpec)).catch((err) => {
+					if (err.codeName === "NamespaceNotFound") {
+						return false;
 					}
-					if (typeof index.fieldOrSpec !== "string" && !common.isPlainObject(index.fieldOrSpec)) {
-						return Promise.reject(new ExtError("ERR_COLLECTION_INDEX_FIELD_OR_SPEC_MUST_BE_OBJECT_OR_STRING", "Collection index.fieldOrSpec must be plain object or string"));
+					return Promise.reject(err);
+				}).then((exists) => {
+					if (exists) {
+						return;
 					}
-					const index_options = Object.assign({}, index.options || {});
-					const collation = Object.assign({}, schema.options.collation || {});
-					if (!common.isEmpty(collation) && !index_options.collation) {
-						index_options.collation = collation;
-					}
-					return collection.indexExists(common.fieldOrSpecToName(index.fieldOrSpec)).catch((err) => {
-						if (err.codeName === "NamespaceNotFound") {
-							return false;
-						}
-						return Promise.reject(err);
-					}).then((exists) => {
-						if (exists) {
-							return;
-						}
-						return collection.createIndex(index.fieldOrSpec, common.isEmpty(index_options) ? undefined : index_options).catch(error => {
-							// TODO check if it's doubled index name, if so, drop old index and try again
-							if (error.codeName === "IndexOptionsConflict" && options.overwrite) {
-								return collection.dropIndex(common.fieldOrSpecToName(index.fieldOrSpec)).then(() => {
-									return collection.createIndex(index.fieldOrSpec, common.isEmpty(index_options) ? undefined : index_options).catch((error) => {
-										return Promise.reject(new ExtError("ERR_MONGODB_INTERNAL_ERROR", error.message));
-									});
+					return collection.createIndex(index.fieldOrSpec, common.isEmpty(index_options) ? undefined : index_options).catch(error => {
+						// TODO check if it's doubled index name, if so, drop old index and try again
+						if (error.codeName === "IndexOptionsConflict" && options.overwrite) {
+							return collection.dropIndex(common.fieldOrSpecToName(index.fieldOrSpec)).then(() => {
+								return collection.createIndex(index.fieldOrSpec, common.isEmpty(index_options) ? undefined : index_options).catch((error) => {
+									return Promise.reject(new ExtError("ERR_MONGODB_INTERNAL_ERROR", error.message));
 								});
-							}
-							return Promise.reject(new ExtError("ERR_MONGODB_INTERNAL_ERROR", error.message));
-						});
+							});
+						}
+						return Promise.reject(new ExtError("ERR_MONGODB_INTERNAL_ERROR", error.message));
 					});
-				})));
-			});
+				});
+			})).then(resolve).catch(reject);
 		}));
 	});
 	return Promise.all(wait).then(() => db);
